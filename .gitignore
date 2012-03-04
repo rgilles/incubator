@@ -1,0 +1,64 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+#python
+*.py[co]
+# python Unit test / coverage reports
+.coverage
+.tox
+
+# IDE configuration files #
+###########################
+# idea
+*.iml
+.idea
+# eclipse
+.gwt
+.settings
+
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+#*.jar
+*.rar
+*.tar
+*.zip
+#python
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+
+# Logs and databases #
+######################
+*.log
+#*.sql
+*.sqlite
+# python Installer logs
+pip-log.txt
+
+# OS generated files #
+######################
+.DS_Store
+ehthumbs.db
+#Icon
+Thumbs.db
