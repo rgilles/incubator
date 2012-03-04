@@ -18,18 +18,18 @@ from urllib.parse import urlsplit, SplitResult
 from web import HTTP_GET as GET, HTTP_METHODS, HTTP_PUT as PUT, HTTP_DELETE as DELETE, HTTP_POST as POST\
 , HTTP_HEAD as HEAD, HTTP_OPTIONS as OPTIONS, HTTP_TRACE as TRACE, HTTP_CONNECT as CONNECT, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
 
-def _is_supported_method(self, method):
+def _is_supported_method(method):
     """
     Test if the given method name is part of web.HTTP_METHODS.
     """
     return method in HTTP_METHODS
-def _fail_if_not_supported(self, method):
+def _fail_if_not_supported(http_method):
         """
         Throws an UnsupportedMethodError if the given method name is not supported.
         @see _is_supported_method
         """
-        if not _is_supported_method(method):
-            raise UnsupportedMethodError(method)
+        if not _is_supported_method(http_method):
+            raise UnsupportedMethodError(http_method)
 class UnsupportedMethodError (Exception):
     """
     This error is raised when the method does not exist
@@ -37,10 +37,11 @@ class UnsupportedMethodError (Exception):
     @see web.HTTP_METHODS
     """
     def __init__(self, bad_method):
+        super().__init__(bad_method)
         self.unsupported_method = bad_method
     @property
     def message(self):
-        return "unsupported method: {0}".format(bad_method)
+        return "unsupported method: {0}".format(self.unsupported_method)
 
 
 
@@ -78,15 +79,15 @@ def valid_segments(segments):
     return True
 
 class URI(object):
-    '''
+    """
     URI
-    '''
+    """
     __slots__ = '__uri', '__structure', '__http_handler'
 
     def __init__(self, uri, http_handler):
-        '''
+        """
         URI constructor
-        '''
+        """
         self.__uri = uri
         self.__structure = urlsplit(uri)
         self.__http_handler = http_handler
@@ -158,31 +159,31 @@ class URI(object):
         else:
             return ()
 
-    def GET(self, headers = {}, body = None):
+    def GET(self, headers = None, body = None):
         self.call(GET, headers, body)
     
-    def PUT(self, headers = {}, body = None):
+    def PUT(self, headers = None, body = None):
         self.call(PUT, headers, body)
     
-    def POST(self, headers = {}, body = None):
+    def POST(self, headers = None, body = None):
         self.call(POST, headers, body)
 
-    def DELETE(self, headers = {}, body = None):
+    def DELETE(self, headers = None, body = None):
         self.call(DELETE, headers, body)
 
-    def HEAD(self, headers = {}, body = None):
+    def HEAD(self, headers = None, body = None):
         self.call(HEAD, headers, body)
     
-    def OPTIONS(self, headers = {}, body = None):
+    def OPTIONS(self, headers = None, body = None):
         self.call(OPTIONS, headers, body)
 
-    def TRACE(self, headers = {}, body = None):
+    def TRACE(self, headers = None, body = None):
         self.call(TRACE, headers, body)
 
-    def CONNECT(self, headers = {}, body = None):
+    def CONNECT(self, headers = None, body = None):
         self.call(CONNECT, headers, body)
 
-    def call(self, method = GET, headers = {}, body = None):
+    def call(self, method = GET, headers = None, body = None):
         _fail_if_not_supported(method)
         self.__http_handler.call(self, method, headers, body)
 
@@ -235,7 +236,7 @@ class URI(object):
         Note that if all segments are trimmed from an absolute path, the
         root absolute path remains.
 
-        @param i the number of segments to be trimmed in the returned URI.  If
+        @param nb the number of segments to be trimmed in the returned URI.  If
         less than 1, this URI is returned unchanged; if equal to or greater
         than the number of segments in this URI's path, all segments are
         trimmed.
@@ -325,8 +326,6 @@ class Message(object):
         self.headers = headers
         self.body = body
 
-#_Response = namedtuple('Response', 'headers body')
-
 #class Response (_Response):
 class Response(Message):
 #    __slots__ = ()
@@ -344,7 +343,7 @@ class Request(Message):
         self.http_version = http_version
 
 class AbstractRequestHandler(object):
-    def call(self, uri, method = GET, headers = {}, body = None):
+    def call(self, uri, method = GET, headers = None, body = None):
         pass
 
 class HttpClientHandler(AbstractRequestHandler):
@@ -357,7 +356,7 @@ class HttpClientHandler(AbstractRequestHandler):
         result = "{0}#{1}".format(result, uri.fragment) if uri.fragment else result
         return result
 
-    def call(self, uri, method = GET, headers = {}, body = None):
+    def call(self, uri, method = GET, headers = None, body = None):
         authority = uri.authority
         connection = self.connections.get(authority)
         if not connection:

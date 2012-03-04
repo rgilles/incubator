@@ -120,7 +120,7 @@ class URITest(unittest.TestCase):
         google = uri("http://www.google.com")
         try:
             google.append_segment(segment)
-        except:
+        except AssertionError:
             pass
         else:
             self.fail("{0} is an invalid segment then a exception must be raised".format(str(segment)))
