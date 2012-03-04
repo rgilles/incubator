@@ -164,6 +164,45 @@ class URITest(unittest.TestCase):
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://www.google.com#fragment", str(trim_result))
 
+    def test_trim_fragment_on_no_fragment(self):
+        """
+        Test tim_fragment method on a URI that does not contain any fragment portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com")
+        google_result = google.trim_fragment()
+        self.assertEqual(google_result, google)
+
+    def test_trim_fragment_on_existing_fragment(self):
+        """
+        Test tim_fragment method on a URI that contains a fragment portion.
+        The expected result a new instance URI.
+        """
+        google = uri("http://www.google.com#fragment")
+        trim_result = google.trim_fragment()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_fragment_on_existing_fragment_with_path(self):
+        """
+        Test tim_fragment method on a URI that contains a fragment portion and a path portion.
+        The expected result is a new URI with the path.
+        """
+        google = uri("http://www.google.com/segment1/segment2#fragment")
+        trim_result = google.trim_fragment()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(trim_result))
+
+    def test_trim_fragment_on_existing_fragment_with_query(self):
+        """
+        Test tim_fragment method on a URI that contains a fragment portion and a query portion.
+        The expected result is a new URI with the fragment.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_fragment()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com?param1=value1&param2=value2", str(trim_result))
+
 if __name__ == "__main__":
 #    import sys;sys.argv = ['', 'URITest.test_scheme']
     unittest.main()

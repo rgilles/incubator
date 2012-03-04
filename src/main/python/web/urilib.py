@@ -312,7 +312,7 @@ class URI(object):
         If this URI has a non-null fragment, returns the URI
         formed by removing it; this URI unchanged, otherwise.
         """
-        if self.fragment is not None:
+        if len(self.fragment) > 0:
             return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, None, self.__http_handler)
         else:
             return self
