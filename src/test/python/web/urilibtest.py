@@ -125,9 +125,44 @@ class URITest(unittest.TestCase):
         else:
             self.fail("{0} is an invalid segment then a exception must be raised".format(str(segment)))
 
+    def test_trim_query_on_no_query(self):
+        """
+        Test tim_query method on a URI that does not contain any query portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com")
+        google_result = google.trim_query()
+        self.assertEqual(google_result, google)
 
+    def test_trim_query_on_existing_query(self):
+        """
+        Test tim_query method on a URI that contains a query portion.
+        The expected result a new instance URI.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2")
+        trim_result = google.trim_query()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
 
+    def test_trim_query_on_existing_query_with_path(self):
+        """
+        Test tim_query method on a URI that contains a query portion and a path portion.
+        The expected result is a new URI with the path.
+        """
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2")
+        trim_result = google.trim_query()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(trim_result))
 
+    def test_trim_query_on_existing_query_with_fragment(self):
+        """
+        Test tim_query method on a URI that contains a query portion and a fragment portion.
+        The expected result is a new URI with the fragment.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_query()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com#fragment", str(trim_result))
 
 if __name__ == "__main__":
 #    import sys;sys.argv = ['', 'URITest.test_scheme']
