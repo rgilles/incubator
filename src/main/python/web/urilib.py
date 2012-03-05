@@ -18,6 +18,8 @@ from urllib.parse import urlsplit, SplitResult
 from web import HTTP_GET as GET, HTTP_METHODS, HTTP_PUT as PUT, HTTP_DELETE as DELETE, HTTP_POST as POST\
 , HTTP_HEAD as HEAD, HTTP_OPTIONS as OPTIONS, HTTP_TRACE as TRACE, HTTP_CONNECT as CONNECT, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
 
+EMPTY_PATH = ""
+
 def _is_supported_method(method):
     """
     Test if the given method name is part of web.HTTP_METHODS.
@@ -249,7 +251,7 @@ class URI(object):
         formed by removing it; this URI unchanged, otherwise.
         """
         if len(self.path) > 0:
-            return _create_uri_from_elements(self.scheme, self.authority, None, self.query, self.fragment, self.__http_handler)
+            return _create_uri_from_elements(self.scheme, self.authority, EMPTY_PATH, self.query, self.fragment, self.__http_handler)
         else:
             return self
 

@@ -127,7 +127,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_query_on_no_query(self):
         """
-        Test tim_query method on a URI that does not contain any query portion.
+        Test trim_query method on a URI that does not contain any query portion.
         The expected result is the original instance URI.
         """
         google = uri("http://www.google.com")
@@ -136,7 +136,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_query_on_existing_query(self):
         """
-        Test tim_query method on a URI that contains a query portion.
+        Test trim_query method on a URI that contains a query portion.
         The expected result a new instance URI.
         """
         google = uri("http://www.google.com?param1=value1&param2=value2")
@@ -146,7 +146,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_query_on_existing_query_with_path(self):
         """
-        Test tim_query method on a URI that contains a query portion and a path portion.
+        Test trim_query method on a URI that contains a query portion and a path portion.
         The expected result is a new URI with the path.
         """
         google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2")
@@ -156,7 +156,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_query_on_existing_query_with_fragment(self):
         """
-        Test tim_query method on a URI that contains a query portion and a fragment portion.
+        Test trim_query method on a URI that contains a query portion and a fragment portion.
         The expected result is a new URI with the fragment.
         """
         google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
@@ -166,7 +166,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_fragment_on_no_fragment(self):
         """
-        Test tim_fragment method on a URI that does not contain any fragment portion.
+        Test trim_fragment method on a URI that does not contain any fragment portion.
         The expected result is the original instance URI.
         """
         google = uri("http://www.google.com")
@@ -175,7 +175,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_fragment_on_existing_fragment(self):
         """
-        Test tim_fragment method on a URI that contains a fragment portion.
+        Test trim_fragment method on a URI that contains a fragment portion.
         The expected result a new instance URI.
         """
         google = uri("http://www.google.com#fragment")
@@ -185,7 +185,7 @@ class URITest(unittest.TestCase):
 
     def test_trim_fragment_on_existing_fragment_with_path(self):
         """
-        Test tim_fragment method on a URI that contains a fragment portion and a path portion.
+        Test trim_fragment method on a URI that contains a fragment portion and a path portion.
         The expected result is a new URI with the path.
         """
         google = uri("http://www.google.com/segment1/segment2#fragment")
@@ -195,11 +195,50 @@ class URITest(unittest.TestCase):
 
     def test_trim_fragment_on_existing_fragment_with_query(self):
         """
-        Test tim_fragment method on a URI that contains a fragment portion and a query portion.
+        Test trim_fragment method on a URI that contains a fragment portion and a query portion.
         The expected result is a new URI with the fragment.
         """
         google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
         trim_result = google.trim_fragment()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com?param1=value1&param2=value2", str(trim_result))
+
+    def test_trim_path_on_no_path(self):
+        """
+        Test trim_path method on a URI that does not contain any path portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com")
+        google_result = google.trim_path()
+        self.assertEqual(google_result, google)
+
+    def test_trim_path_on_existing_path(self):
+        """
+        Test trim_path method on a URI that contains a path portion.
+        The expected result a new instance URI.
+        """
+        google = uri("http://www.google.com/segment1/segment2")
+        trim_result = google.trim_path()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_path_on_existing_path_with_fragment(self):
+        """
+        Test trim_path method on a URI that contains a path portion and a path portion.
+        The expected result is a new URI with the path.
+        """
+        google = uri("http://www.google.com/segment1/segment2#fragment")
+        trim_result = google.trim_path()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com#fragment", str(trim_result))
+
+    def test_trim_path_on_existing_path_with_query(self):
+        """
+        Test trim_path method on a URI that contains a path portion and a query portion.
+        The expected result is a new URI with the path.
+        """
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2")
+        trim_result = google.trim_path()
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://www.google.com?param1=value1&param2=value2", str(trim_result))
 
