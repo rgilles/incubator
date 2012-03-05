@@ -196,7 +196,7 @@ class URITest(unittest.TestCase):
     def test_trim_fragment_on_existing_fragment_with_query(self):
         """
         Test trim_fragment method on a URI that contains a fragment portion and a query portion.
-        The expected result is a new URI with the fragment.
+        The expected result is a new URI with the query.
         """
         google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
         trim_result = google.trim_fragment()
@@ -225,7 +225,7 @@ class URITest(unittest.TestCase):
     def test_trim_path_on_existing_path_with_fragment(self):
         """
         Test trim_path method on a URI that contains a path portion and a path portion.
-        The expected result is a new URI with the path.
+        The expected result is a new URI with the fragment.
         """
         google = uri("http://www.google.com/segment1/segment2#fragment")
         trim_result = google.trim_path()
@@ -235,12 +235,80 @@ class URITest(unittest.TestCase):
     def test_trim_path_on_existing_path_with_query(self):
         """
         Test trim_path method on a URI that contains a path portion and a query portion.
-        The expected result is a new URI with the path.
+        The expected result is a new URI with the query.
         """
         google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2")
         trim_result = google.trim_path()
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://www.google.com?param1=value1&param2=value2", str(trim_result))
+
+    def test_trim_one_segment_on_no_segments(self):
+        """
+        Test trim_segments method on a URI that does not contain any path portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com")
+        google_result = google.trim_segments(1)
+        self.assertEqual(google_result, google)
+
+    def test_trim_zero_segment_on_no_segments(self):
+        """
+        Test trim_segments method on a URI that does not contain any path portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com")
+        google_result = google.trim_segments(0)
+        self.assertEqual(google_result, google)
+
+    def test_trim_one_segment_on_existing_segments(self):
+        """
+        Test trim_segments method on a URI that contains a segments portion.
+        The expected result a new instance URI with the first segment.
+        """
+        google = uri("http://www.google.com/segment1/segment2")
+        trim_result = google.trim_segments(1)
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1", str(trim_result))
+
+    def test_trim_zero_segment_on_existing_segments(self):
+        """
+        Test trim_segments method on a URI that contains a segments portion.
+        The expected result is the original instance URI.
+        """
+        google = uri("http://www.google.com/segment1/segment2")
+        trim_result = google.trim_segments(0)
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(trim_result))
+
+    def test_trim_two_segments_on_existing_segments(self):
+        """
+        Test trim_segments method on a URI that contains a segments portion.
+        The expected result a new instance URI with the first segment.
+        """
+        google = uri("http://www.google.com/segment1/segment2")
+        trim_result = google.trim_segments(2)
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_one_segments_on_existing_segments_with_fragment(self):
+        """
+        Test trim_segments method on a URI that contains a segments portion and a path portion.
+        The expected result is a new URI with the first segment and the path.
+        """
+        google = uri("http://www.google.com/segment1/segment2#fragment")
+        trim_result = google.trim_segments(1)
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1#fragment", str(trim_result))
+
+    def test_trim_one_segments_on_existing_segments_with_query(self):
+        """
+        Test trim_segments method on a URI that contains a segments portion and a query portion.
+        The expected result is a new URI with the first segment and the query.
+        """
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2")
+        trim_result = google.trim_segments(1)
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1?param1=value1&param2=value2", str(trim_result))
 
 if __name__ == "__main__":
 #    import sys;sys.argv = ['', 'URITest.test_scheme']
