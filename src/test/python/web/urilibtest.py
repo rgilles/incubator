@@ -125,6 +125,29 @@ class URITest(unittest.TestCase):
             pass
         else:
             self.fail("{0} is an invalid segment then a exception must be raised".format(str(segment)))
+    def test_append_path_none_existing_path(self):
+        google = uri("http://www.google.com")
+        result_uri = google.append_path("/segment1/segment2")
+        self.assertIsNotNone(result_uri)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(result_uri))
+
+    def test_append_path_empty(self):
+        google = uri("http://www.google.com")
+        result_uri = google.append_path("")
+        self.assertIsNotNone(result_uri)
+        self.assertEqual(google, result_uri)
+
+    def test_append_path_none(self):
+        google = uri("http://www.google.com")
+        result_uri = google.append_path(None)
+        self.assertIsNotNone(result_uri)
+        self.assertEqual(google, result_uri)
+
+    def test_append_path_on_existing_path(self):
+        google = uri("http://www.google.com/existing/path")
+        result_uri = google.append_path("/segment1/segment2")
+        self.assertIsNotNone(result_uri)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(result_uri))
 
     def test_trim_query_on_no_query(self):
         """

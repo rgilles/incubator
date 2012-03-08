@@ -293,7 +293,11 @@ class URI(object):
                                   to valid_segment method.
         """
 
-        segments = path
+        segments = path if path else EMPTY_PATH
+
+        if len(segments) < 1 and self.path == EMPTY_PATH:
+            return self
+
         if isinstance(path, str):
             segments = _convert_to_segment(path)
 
