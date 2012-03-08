@@ -15,16 +15,21 @@
 #
 from http.client import HTTPConnection
 from urllib.parse import urlsplit, SplitResult
+from .assertion import iterable, assert_that_argument_type_is
 from web import HTTP_GET as GET, HTTP_METHODS, HTTP_PUT as PUT, HTTP_DELETE as DELETE, HTTP_POST as POST\
 , HTTP_HEAD as HEAD, HTTP_OPTIONS as OPTIONS, HTTP_TRACE as TRACE, HTTP_CONNECT as CONNECT, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
 
 EMPTY_PATH = ""
+ROOT_PATH = "/"
+EMPTY_SEGMENT = EMPTY_PATH
+EMPTY_SEGMENTS = ()
 
 def _is_supported_method(method):
     """
     Test if the given method name is part of web.HTTP_METHODS.
     """
     return method in HTTP_METHODS
+
 def _fail_if_not_supported(http_method):
         """
         Throws an UnsupportedMethodError if the given method name is not supported.
@@ -32,6 +37,7 @@ def _fail_if_not_supported(http_method):
         """
         if not _is_supported_method(http_method):
             raise UnsupportedMethodError(http_method)
+
 class UnsupportedMethodError (Exception):
     """
     This error is raised when the method does not exist
@@ -44,8 +50,6 @@ class UnsupportedMethodError (Exception):
     @property
     def message(self):
         return "unsupported method: {0}".format(self.unsupported_method)
-
-
 
 def valid_segment(segment):
     """
@@ -72,13 +76,30 @@ def valid_segments(segments):
     a tuple:  ('segment1', 'segment2', ...)
     a string: 'segment1/segment2/...'
     """
-    if not segments or not isinstance(segments, (list, tuple)):
+    if isinstance(segments, str) or not iterable(segments):
         return False
 
     for segment in segments:
         if not valid_segment(segment):
             return False
     return True
+
+def _is_absolute_path(segments):
+    return len(segments) > 1 and segments[0] == EMPTY_SEGMENT
+
+def _convert_to_segment(path, trim_root_segment = True):
+    assert_that_argument_type_is(path, (str,tuple),"path")
+    result = None
+    if isinstance(path, str):
+        if len(path) < 1 or path == ROOT_PATH:
+            result = EMPTY_SEGMENTS
+        else :
+            result = path.split(SEGMENT_SEPARATOR)
+
+    if trim_root_segment and _is_absolute_path(result):
+        result = tuple(result[1:len(result)])
+
+    return result
 
 class URI(object):
     """
@@ -155,11 +176,15 @@ class URI(object):
     def port(self):
         return self.__structure.port
 
+    @property
     def segments(self):
-        if self.path:
-            return self.path.split('/')
-        else:
-            return ()
+        """
+        If this is a hierarchical URI with a path, returns an array containing
+        the segments of the path; an empty array otherwise. The leading separator
+        in an absolute path is not represented in this array, but a trailing
+        separator is represented by an empty-string segment as the final element.
+        """
+        return _convert_to_segment(self.path)
 
     def GET(self, headers = None, body = None):
         self.call(GET, headers, body)
@@ -201,8 +226,7 @@ class URI(object):
         """
         if not valid_segment(segment):
             raise AssertionError("{0} is an invalid segment it must be not null string and not contain any of the following characters: '/' '?' '#'".format(str(segment)))
-        return _create_uri_from_elements(self.scheme, self.authority, SEGMENT_SEPARATOR.join((self.path, segment)), self.query, self.fragment, self.__http_handler)
-
+        return self.append_segments((segment,))
 
     def append_segments(self, segments):
         """
@@ -223,10 +247,10 @@ class URI(object):
         if isinstance(segments, str):
             segments = segments.split(SEGMENT_SEPARATOR)
 
-        if not valid_segments(segments):
-            raise AssertionError("invalid segments: {0}".format(str(segments)))
+        return self.append_path(self.segments + tuple(segments))
 
-        return _create_uri_from_elements(self.scheme, self.authority, SEGMENT_SEPARATOR.join([self.path] + list(segments)), self.query, self.fragment, self.__http_handler)
+    def create_root_uri_from(self):
+        return self.append_path(ROOT_PATH)
 
     def trim_segments(self, nb):
         """
@@ -239,11 +263,46 @@ class URI(object):
         root absolute path remains.
 
         @param nb the number of segments to be trimmed in the returned URI.  If
-        less than 1, this URI is returned unchanged; if equal to or greater
-        than the number of segments in this URI's path, all segments are
-        trimmed.
+                  less than 1, this URI is returned unchanged; if equal to or greater
+                  than the number of segments in this URI's path, all segments are
+                  trimmed.
         """
-        pass
+        if nb < 1:
+            return self
+        #split path
+        segments = self.segments
+        #return self if there is no segments to trim
+        if segments is EMPTY_SEGMENTS:
+            return self
+        if len(segments) <= nb:
+            return self.create_root_uri_from()
+        else:
+            return self.append_path(segments[0:len(segments) - nb])
+
+
+    def append_path(self, path):
+        """
+        Returns the URI formed by appending the specified path by replacing
+        the path of this URI, if hierarchical; this URI unchanged,
+        otherwise.  If this URI has an authority and/or device, but no path,
+        the segment becomes the first under the root in an absolute path.
+
+        @param path the path of the new URI. It can be of type string or tuple or list or iterable string
+
+        @exception AssertionError if path is not a valid segment according
+                                  to valid_segment method.
+        """
+
+        segments = path
+        if isinstance(path, str):
+            segments = _convert_to_segment(path)
+
+        if not valid_segments(segments):
+            raise AssertionError("invalid segments: {0}".format(str(segments)))
+
+        path = SEGMENT_SEPARATOR.join(segments) if _is_absolute_path(segments) else SEGMENT_SEPARATOR.join(("", ) + segments)
+
+        return _create_uri_from_elements(self.scheme, self.authority, path, self.query, self.fragment, self.__http_handler)
 
     def trim_path(self):
         """
@@ -251,7 +310,7 @@ class URI(object):
         formed by removing it; this URI unchanged, otherwise.
         """
         if len(self.path) > 0:
-            return _create_uri_from_elements(self.scheme, self.authority, EMPTY_PATH, self.query, self.fragment, self.__http_handler)
+            return self.append_path(EMPTY_PATH)
         else:
             return self
 
@@ -277,7 +336,7 @@ class URI(object):
 
         @return the URI formed from this URI and the given query.
         """
-        if query is not None and not isinstance(query, str) and not isinstance(query, tuple):
+        if query is not None and not isinstance(query, (str, tuple)):
             raise AssertionError("{0} must be a string or a tuple of tuple like ((param1, value1),(param2, value2))".format(str(query)))
         # create the string representation of the query
         str_query = ""

@@ -50,6 +50,7 @@ class URITest(unittest.TestCase):
         self.assertEqual(google.password, "tutu")
         self.assertEqual(google.port, 8080)
         self.assertEqual(google.path, '/apath/aparam1;aparam2/subpath')
+        self.assertEqual(google.segments, ('apath','aparam1;aparam2', 'subpath'))
         self.assertEqual(google.query, 'q=myquery')
         self.assertEqual(google.fragment, 'afragment')
 
@@ -272,13 +273,12 @@ class URITest(unittest.TestCase):
 
     def test_trim_zero_segment_on_existing_segments(self):
         """
-        Test trim_segments method on a URI that contains a segments portion.
+        Test trim 0 segments on a URI that contains a segments portion.
         The expected result is the original instance URI.
         """
         google = uri("http://www.google.com/segment1/segment2")
         trim_result = google.trim_segments(0)
-        self.assertNotEqual(trim_result, google)
-        self.assertEqual("http://www.google.com/segment1/segment2", str(trim_result))
+        self.assertEqual(trim_result, google)
 
     def test_trim_two_segments_on_existing_segments(self):
         """
