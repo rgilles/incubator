@@ -20,7 +20,9 @@
 # eclipse
 .gwt
 .settings
-
+.classpath
+.project
+.pydevproject
 
 # Packages #
 ############

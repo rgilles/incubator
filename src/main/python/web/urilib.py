@@ -279,6 +279,13 @@ class URI(object):
         else:
             return self.append_path(segments[0:len(segments) - nb])
 
+    def trim_from_authority(self):
+        """
+        If this URI has a not empty path and or query and or fragment, returns the URI
+        formed by removing them; this URI unchanged, otherwise.
+        """
+        return self.trim_from_path().trim_path()
+
 
     def append_path(self, path):
         """
@@ -317,6 +324,13 @@ class URI(object):
             return self.append_path(EMPTY_PATH)
         else:
             return self
+
+    def trim_from_path(self):
+        """
+        If this URI has a not empty query and or fragment, returns the URI
+        formed by removing them; this URI unchanged, otherwise.
+        """
+        return self.trim_from_query().trim_query()
 
 
     def valid_query(self, query):
@@ -365,6 +379,14 @@ class URI(object):
             return _create_uri_from_elements(self.scheme, self.authority, self.path, None, self.fragment, self.__http_handler)
         else:
             return self
+
+    def trim_from_query(self):
+        """
+        If this URI has a not empty query, returns the URI
+        formed by removing it; this URI unchanged, otherwise.
+        """
+        return self.trim_fragment()
+        
 
     def append_fragment(self, fragment):
         """

@@ -5,8 +5,8 @@ def iterable(value):
     return hasattr(value, '__iter__') or hasattr(value, '__getitem__')
 
 
-def is_class(type):
-    return hasattr(type, "__base__")
+def is_class(type_):
+    return hasattr(type_, "__base__")
 
 class IllegalArgumentError (AssertionError):
     pass

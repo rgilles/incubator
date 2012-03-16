@@ -333,6 +333,85 @@ class URITest(unittest.TestCase):
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://www.google.com/segment1?param1=value1&param2=value2", str(trim_result))
 
+    def test_trim_from_query_on_existing_query_and_fragment(self):
+        """
+        Test trim_from_query method on a URI that contains a query portion and a fragment portion.
+        The expected result is a new URI without the fragment.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_from_query()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com?param1=value1&param2=value2", str(trim_result))
+
+    def test_trim_from_query_on_existing_query_without_fragment(self):
+        """
+        Test trim_from_query method on a URI that contains a query portion only.
+        The expected result is the original URI.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2")
+        trim_result = google.trim_from_query()
+        self.assertEqual(trim_result, google)
+
+    def test_trim_from_query_on_existing_none_query_and_none_fragment(self):
+        """
+        Test trim_from_query method on a URI that does not contain query portion and fragment portion.
+        The expected result is the original URI.
+        """
+        google = uri("http://www.google.com")
+        trim_result = google.trim_from_query()
+        self.assertEqual(trim_result, google)
+
+    def test_trim_from_query_on_none_query_and_existing_fragment(self):
+        """
+        Test trim_from_query method on a URI that does not contain a query portion but a fragment portion.
+        The expected result is a new URI without the fragment.
+        """
+        google = uri("http://www.google.com#fragment")
+        trim_result = google.trim_from_query()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_from_path_on_existing_path_and_query_and_fragment(self):
+        """
+        Test trim_from_from method on a URI that contains a path, a query portion and a fragment portion.
+        The expected result is a new URI without the query and the fragment.
+        """
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_from_path()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com/segment1/segment2", str(trim_result))
+
+    def test_trim_from_path_on_none_path_but_query_and_fragment(self):
+        """
+        Test trim_from_from method on a URI that does not contain a path but a query portion and a fragment portion.
+        The expected result is a new URI without the query and the fragment.
+        """
+        google = uri("http://www.google.com?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_from_path()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_from_authority_on_existing_authority_path_and_query_and_fragment(self):
+        """
+        Test trim_from_authority method on a URI that contains a path, a query portion and a fragment portion.
+        The expected result is a new URI without the query and the fragment.
+        """
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_from_authority()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://www.google.com", str(trim_result))
+
+    def test_trim_from_authority_on_none_authority_but_path_and_query_and_fragment(self):
+        """
+        Test trim_from_authority method on a URI that does not contain a path but a query portion and a fragment portion.
+        The expected result is a new URI without the query and the fragment.
+        """
+        google = uri("http:///segment1/segment2?param1=value1&param2=value2#fragment")
+        trim_result = google.trim_from_authority()
+        self.assertNotEqual(trim_result, google)
+        self.assertEqual("http://", str(trim_result))
+
+
 if __name__ == "__main__":
 #    import sys;sys.argv = ['', 'URITest.test_scheme']
     unittest.main()
