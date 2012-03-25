@@ -18,7 +18,7 @@ from webtest import urilibtest, assertiontest
 
 VERSION_TAG = '${version}'
 
-VERSION = '1.0-M1'
+VERSION = '1.0-SNAPSHOT'
 
 TEST_MODULES = [urilibtest,
                 assertiontest,]
