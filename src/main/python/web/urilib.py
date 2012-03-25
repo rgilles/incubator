@@ -16,8 +16,7 @@
 from http.client import HTTPConnection
 from urllib.parse import urlsplit, SplitResult
 from .assertion import iterable, assert_that_argument_type_is
-from web import HTTP_GET as GET, HTTP_METHODS, HTTP_PUT as PUT, HTTP_DELETE as DELETE, HTTP_POST as POST\
-, HTTP_HEAD as HEAD, HTTP_OPTIONS as OPTIONS, HTTP_TRACE as TRACE, HTTP_CONNECT as CONNECT, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
+from web import HTTP_GET as GET, HTTP_METHODS, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
 
 EMPTY_PATH = ""
 ROOT_PATH = "/"
@@ -107,14 +106,12 @@ class URI(object):
     """
     __slots__ = '__uri', '__structure', '__http_handler'
 
-    def __init__(self, uri, http_handler):
+    def __init__(self, uri):
         """
         URI constructor
         """
         self.__uri = uri
         self.__structure = urlsplit(uri)
-        self.__http_handler = http_handler
-
     def __str__(self):
         return self.__uri
 
@@ -185,34 +182,6 @@ class URI(object):
         separator is represented by an empty-string segment as the final element.
         """
         return _convert_to_segment(self.path)
-
-    def GET(self, headers = None, body = None):
-        self.call(GET, headers, body)
-    
-    def PUT(self, headers = None, body = None):
-        self.call(PUT, headers, body)
-    
-    def POST(self, headers = None, body = None):
-        self.call(POST, headers, body)
-
-    def DELETE(self, headers = None, body = None):
-        self.call(DELETE, headers, body)
-
-    def HEAD(self, headers = None, body = None):
-        self.call(HEAD, headers, body)
-    
-    def OPTIONS(self, headers = None, body = None):
-        self.call(OPTIONS, headers, body)
-
-    def TRACE(self, headers = None, body = None):
-        self.call(TRACE, headers, body)
-
-    def CONNECT(self, headers = None, body = None):
-        self.call(CONNECT, headers, body)
-
-    def call(self, method = GET, headers = None, body = None):
-        _fail_if_not_supported(method)
-        self.__http_handler.call(self, method, headers, body)
 
     def append_segment(self, segment):
         """
@@ -313,7 +282,7 @@ class URI(object):
 
         path = SEGMENT_SEPARATOR.join(segments) if _is_absolute_path(segments) else SEGMENT_SEPARATOR.join(("", ) + segments)
 
-        return _create_uri_from_elements(self.scheme, self.authority, path, self.query, self.fragment, self.__http_handler)
+        return _create_uri_from_elements(self.scheme, self.authority, path, self.query, self.fragment)
 
     def trim_path(self):
         """
@@ -368,7 +337,7 @@ class URI(object):
 
         if not self.valid_query(str_query):
             raise AssertionError("{0} is not a valid query".format(str(query)))
-        return _create_uri_from_elements(self.scheme, self.authority, self.path, str_query, self.fragment, self.__http_handler)
+        return _create_uri_from_elements(self.scheme, self.authority, self.path, str_query, self.fragment)
 
     def trim_query(self):
         """
@@ -376,7 +345,7 @@ class URI(object):
         formed by removing it; this URI unchanged, otherwise.
         """
         if len(self.query) > 0:
-            return _create_uri_from_elements(self.scheme, self.authority, self.path, None, self.fragment, self.__http_handler)
+            return _create_uri_from_elements(self.scheme, self.authority, self.path, None, self.fragment)
         else:
             return self
 
@@ -392,7 +361,7 @@ class URI(object):
         """
         Returns the URI formed from this URI and the given fragment.
         """
-        return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, fragment, self.__http_handler)
+        return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, fragment)
 
     def trim_fragment(self):
         """
@@ -400,13 +369,13 @@ class URI(object):
         formed by removing it; this URI unchanged, otherwise.
         """
         if len(self.fragment) > 0:
-            return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, None, self.__http_handler)
+            return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, None)
         else:
             return self
 
 
-def _create_uri_from_elements(scheme, authority, path, query, fragment, http_handler):
-    return URI(SplitResult(scheme, authority, path, query, fragment).geturl(), http_handler)
+def _create_uri_from_elements(scheme, authority, path, query, fragment):
+    return URI(SplitResult(scheme, authority, path, query, fragment).geturl())
 
 class Message(object):
     def __init__(self, headers, body):

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+VERSION="${version}"
 DEFAULT_HTTP_HANDLER = None
 
 HTTP_GET = 'GET'
@@ -39,4 +40,4 @@ PORT_SEPARATOR = ":"
 
 def uri(uri):
     from web.urilib import URI
-    return URI(uri, DEFAULT_HTTP_HANDLER)
+    return URI(uri)
