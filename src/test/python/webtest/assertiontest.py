@@ -49,5 +49,11 @@ class AssertionTest(unittest.TestCase):
         except IllegalArgumentError:
             self.fail("no error must be raised when we test if the type of an string is str")
 
+def suite():
+#    tests = ['test_default_size', 'test_resize']
+
+#    return unittest.TestSuite(map(WidgetTestCase, tests))
+    return unittest.TestLoader().loadTestsFromTestCase(AssertionTest)
+
 if __name__ == '__main__':
     unittest.main()

@@ -411,7 +411,13 @@ class URITest(unittest.TestCase):
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://", str(trim_result))
 
+def suite():
+#    tests = ['test_default_size', 'test_resize']
 
+#    return unittest.TestSuite(map(WidgetTestCase, tests))
+    return unittest.TestLoader().loadTestsFromTestCase(URITest)
+
+        
 if __name__ == "__main__":
 #    import sys;sys.argv = ['', 'URITest.test_scheme']
     unittest.main()
