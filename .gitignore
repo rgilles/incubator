@@ -11,7 +11,8 @@
 # python Unit test / coverage reports
 .coverage
 .tox
-
+# python distutil
+MAN
 # IDE configuration files #
 ###########################
 # idea

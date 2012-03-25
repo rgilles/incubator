@@ -7,10 +7,12 @@ from distutils.core import setup
 from distutils.command.build_scripts import build_scripts as _build_scripts
 from distutils.command.clean import clean as _clean
 from distutils import log
-import os.path
 import sys
 import unittest
-import os.path
+import os
+
+MANIFEST_FILE_NAME = "MANIFEST"
+
 sys.path.append(os.path.join(sys.path[0],'src','main','python'))
 sys.path.append(os.path.join(sys.path[0],'src','test','python'))
 
@@ -46,7 +48,12 @@ def fix_version(outfile, dry_run):
             raise
 
 class clean(_clean):
-    pass
+    def run(self):
+        super().run()
+        if os.path.isfile(MANIFEST_FILE_NAME):
+            log.info("remove generated manifest file")
+            os.remove(MANIFEST_FILE_NAME)
+
 
 class build_py(_build_py):
     """Specialized Python source builder."""
@@ -99,7 +106,7 @@ class build_scripts(_build_scripts):
             fix_version(outfile, self.dry_run)
 
 #cmdclass={'build_py': build_py}, used to test.
-setup(cmdclass={'build_py': build_py, 'build_scripts': build_scripts},
+setup(cmdclass={'build_py': build_py, 'build_scripts': build_scripts, 'clean': clean},
       name='curi',
       version=VERSION,
       description='URI manipulation',
