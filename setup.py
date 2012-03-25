@@ -18,7 +18,7 @@ from webtest import urilibtest, assertiontest
 
 VERSION_TAG = '${version}'
 
-VERSION = '1.0-SNAPSHOT'
+VERSION = '1.0-M1'
 
 TEST_MODULES = [urilibtest,
                 assertiontest,]
@@ -29,7 +29,7 @@ class DistutilsTestError (DistutilsError):
 
 def fix_version(outfile, dry_run):
     try:
-        with open(outfile, 'r') as f :
+        with open(outfile) as f :
              lines = []
              to_substitute = False
              for line in f:
@@ -96,7 +96,7 @@ class build_scripts(_build_scripts):
         log.info("fix version on scripts")
         for script in self.scripts:
             outfile = os.path.join(self.build_dir, os.path.basename(script))
-            fixversion(outfile, self.dry_run)
+            fix_version(outfile, self.dry_run)
 
 #cmdclass={'build_py': build_py}, used to test.
 setup(cmdclass={'build_py': build_py, 'build_scripts': build_scripts},
