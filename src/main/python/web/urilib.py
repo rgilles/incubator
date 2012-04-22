@@ -399,10 +399,10 @@ class Request(Message):
         self.http_version = http_version
 
 class AbstractRequestHandler(object):
-    def call(self, uri, method = GET, headers = None, body = None):
+    def request(self, uri, method = GET, headers = None, body = None):
         pass
 
-class HttpClientHandler(AbstractRequestHandler):
+class HttpRequestHandler(AbstractRequestHandler):
 
     connections = {}
 
@@ -412,7 +412,7 @@ class HttpClientHandler(AbstractRequestHandler):
         result = "{0}#{1}".format(result, uri.fragment) if uri.fragment else result
         return result
 
-    def call(self, uri, method = GET, headers = None, body = None):
+    def request(self, uri, method = GET, headers = None, body = None):
         authority = uri.authority
         connection = self.connections.get(authority)
         if not connection:
