@@ -10,14 +10,15 @@ from distutils.command.clean import clean as _clean
 from distutils import log
 import fnmatch
 from ftplib import FTP
-from multiprocessing import Process
+from subprocess import  Popen
 import sys
 from time import sleep
 import unittest
 import os
 sys.path.append(os.path.join(sys.path[0],'src','main','python'))
 sys.path.append(os.path.join(sys.path[0],'src','test','python'))
-from webtest import urilibtest, assertiontest, webserver, itest
+from webtest import urilibtest, assertiontest, itest
+from webtest.webserver import DEFAULT_PORT_NUMBER
 
 MANIFEST_FILE_NAME = "MANIFEST"
 
@@ -155,25 +156,25 @@ class Test(Command):
     def run(self):
         test()
 
-def test():
+def test(test_modules = TEST_MODULES, message = "running tests"):
     """
     Run test cases contained wihtin the test folder.
     """
-    log.info("running tests")
+    log.info(message)
     fail = False
-    for module in TEST_MODULES:
+    for module in test_modules:
         suite = module.suite()
         result = unittest.TextTestRunner(verbosity=2).run(suite)
         fail = fail or not result.wasSuccessful()
     if fail:
-        raise DistutilsTestError('Exit the build due to a test error!')
+        raise DistutilsTestError('Exit due to a test error!')
 
 
 class Verify(Command):
     description = "Verify package by running the integration tests agains a local http server"
     user_options = [
         ('port=', 'p',
-         "port number for the http server (default: 8080)"),
+         "port number for the http server (default: {0})".format(DEFAULT_PORT_NUMBER)),
     ]
 
     def initialize_options(self):
@@ -181,25 +182,23 @@ class Verify(Command):
 
     def finalize_options(self):
         if self.port is None:
-            self.port = 8080
+            self.port = DEFAULT_PORT_NUMBER
+        else:
+            self.port = int(self.port)
 
     def run(self):
         #startup the web server
-        p = Process(target=webserver.start, args=(self.port,))
-        p.start()
+        log.info("integration test run on port %d", self.port)
+        p = Popen("python {0} --port={1}".format(os.path.join("src", "test", "python", "webtest", "webserver.py"), self.port), shell=True)
         try:
-            log.info("wait 5s server startup...") #todo replace it by synchro mechanism
-            sleep(5)
-            log.info("running integration tests")
-            fail = False
-            for module in ITEST_MODULES:
-                suite = module.suite()
-                result = unittest.TextTestRunner(verbosity=2).run(suite)
-                fail = fail or not result.wasSuccessful()
-            if fail:
-                raise DistutilsTestError('Exit the build due to integration test errors!')
+            # p = Process(target=webserver.start, args=(self.port,))
+            # process based solution does not work :(
+            # p.start()
+            log.info("wait 2s server startup...") #todo replace it by synchro mechanism
+            sleep(2)
+            test(ITEST_MODULES, "running integration tests")
         finally:
-            #shutdown the web server
+            log.info("shutdown the web server")
             p.terminate()
 
 class build_scripts(_build_scripts):

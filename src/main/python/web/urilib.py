@@ -372,7 +372,23 @@ class URI(object):
             return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, None)
         else:
             return self
+    @property
+    def absolute(self):
+        """
+        If this URI is absolute returns the absolute path
+        concatened with the query and the fragment if any.
+        """
+        result = self.path
+        result = "{0}?{1}".format(result, self.query) if self.query else result
+        result = "{0}#{1}".format(result, self.fragment) if self.fragment else result
+        return result
 
+    def as_absolute(self):
+        """
+        If this URI is absolute returns the absolute path
+        concatened with the query and the fragment if any.
+        """
+        return URI(self.absolute)
 
 def _create_uri_from_elements(scheme, authority, path, query, fragment):
     return URI(SplitResult(scheme, authority, path, query, fragment).geturl())
@@ -406,18 +422,14 @@ class HttpRequestHandler(AbstractRequestHandler):
 
     connections = {}
 
-    def as_absolute_path(self, uri):
-        result = uri.path
-        result = "{0}?{1}".format(result, uri.query) if uri.query else result
-        result = "{0}#{1}".format(result, uri.fragment) if uri.fragment else result
-        return result
-
     def request(self, uri, method = GET, headers = None, body = None):
+        headers = headers if headers is not None else {}
         authority = uri.authority
         connection = self.connections.get(authority)
         if not connection:
-            connection = self.connections.setdefault(HTTPConnection(authority))
-        connection.request(method, self.as_absolute_path(uri), body, headers)
+            connection = HTTPConnection(authority)
+            self.connections[authority] = connection
+        connection.request(method, uri.absolute, body, headers)
         response = connection.getresponse()
         result = Response(response.headers, response.read(), response.status, response.reason, response.version)
         return result

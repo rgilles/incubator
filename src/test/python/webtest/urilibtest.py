@@ -15,6 +15,8 @@
 #
 
 import unittest
+from hamcrest.core import assert_that
+from hamcrest.core.core.is_ import is_
 from web import uri
 
 
@@ -410,6 +412,14 @@ class URITest(unittest.TestCase):
         trim_result = google.trim_from_authority()
         self.assertNotEqual(trim_result, google)
         self.assertEqual("http://", str(trim_result))
+
+    def test_as_absolute(self):
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2#fragment")
+        assert_that(str(google.as_absolute()), is_("/segment1/segment2?param1=value1&param2=value2#fragment"))
+
+    def test_absolute(self):
+        google = uri("http://www.google.com/segment1/segment2?param1=value1&param2=value2#fragment")
+        assert_that(google.absolute, is_("/segment1/segment2?param1=value1&param2=value2#fragment"))
 
 def suite():
 #    tests = ['test_default_size', 'test_resize']
