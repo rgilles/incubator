@@ -18,6 +18,10 @@ from urllib.parse import urlsplit, SplitResult
 from .assertion import iterable, assert_that_argument_type_is
 from web import HTTP_GET as GET, HTTP_METHODS, FRAGMENT_SEPARATOR, SEGMENT_SEPARATOR, QUERY_SEPARATOR
 
+CHARSET_TOKEN = "charset="
+
+HTTP_CONTENT_TYPE_HEADER = "Content-Type"
+
 EMPTY_PATH = ""
 ROOT_PATH = "/"
 EMPTY_SEGMENT = EMPTY_PATH
@@ -406,6 +410,17 @@ class Response(Message):
         self.status_code = status_code
         self.reason_phrase = reason_phrase
         self.http_version = http_version
+    @property
+    def charset(self):
+        content_type = self.headers[HTTP_CONTENT_TYPE_HEADER]
+        if content_type is not None and content_type.find(CHARSET_TOKEN) > 0 :
+            return content_type[content_type.find(CHARSET_TOKEN) + len(CHARSET_TOKEN):]
+        return "UTF-8"
+
+
+    def __str__(self):
+        status_line = "HTTP-{0} {1} {2}".format(self.http_version, self.status_code, self.reason_phrase)
+        return "{0}\n{1}{2}".format(status_line, self.headers, str(self.body, self.charset, 'replace'))
 
 class Request(Message):
     def __init__(self, headers, body, method, request_uri, http_version):
