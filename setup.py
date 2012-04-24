@@ -33,8 +33,8 @@ import unittest
 import os
 
 PYTHON_CACHE = "__pycache__"
-sys.path.append(os.path.join(sys.path[0],'src','main','python'))
-sys.path.append(os.path.join(sys.path[0],'src','test','python'))
+sys.path.append(os.path.join(sys.path[0], 'src', 'main', 'python'))
+sys.path.append(os.path.join(sys.path[0], 'src', 'test', 'python'))
 from webtest import urilibtest, assertiontest, itest
 from webtest.webserver import DEFAULT_PORT_NUMBER
 
@@ -45,30 +45,32 @@ VERSION_TAG = '${version}'
 VERSION = '1.0-SNAPSHOT'
 
 TEST_MODULES = [urilibtest,
-                assertiontest,]
+                assertiontest, ]
 ITEST_MODULES = [itest]
 
-class DistutilsTestError (DistutilsError):
+class DistutilsTestError(DistutilsError):
     """Unable to complite the test without errors."""
     pass
 
+
 def fix_version(outfile, dry_run):
     try:
-        with open(outfile) as f :
-             lines = []
-             to_substitute = False
-             for line in f:
-                 if line.find(VERSION_TAG) > -1:
+        with open(outfile) as f:
+            lines = []
+            to_substitute = False
+            for line in f:
+                if line.find(VERSION_TAG) > -1:
                     to_substitute = True
-                    line = line.replace(VERSION_TAG,VERSION)
-                 lines.append(line)
+                    line = line.replace(VERSION_TAG, VERSION)
+                lines.append(line)
         if to_substitute:
             log.info("version tag substituted in %s", os.path.basename(outfile))
-            with open(outfile, 'w') as f :
+            with open(outfile, 'w') as f:
                 f.writelines(lines)
     except IOError:
         if not dry_run:
             raise
+
 
 class Deploy(Command):
     description = "publish distribution archive to the remote repository"
@@ -91,7 +93,7 @@ class Deploy(Command):
 
     def finalize_options(self):
         self.set_undefined_options('bdist',
-                                   ('dist_dir', 'dist_dir'))
+            ('dist_dir', 'dist_dir'))
         if self.dist_dir is None:
             self.dist_dir = "dist"
 
@@ -106,7 +108,7 @@ class Deploy(Command):
 
     def get_dist_files(self):
         if self.distribution.dist_files is not None and len(self.distribution.dist_files) > 0:
-            for _,_,file_path in self.distribution.dist_files:
+            for _, _, file_path in self.distribution.dist_files:
                 yield file_path
         else:
             base_dir = self.distribution.get_fullname()
@@ -114,11 +116,12 @@ class Deploy(Command):
                 file_path = os.path.join(self.dist_dir, file)
                 if os.path.isfile(file_path) and fnmatch.fnmatch(file, "{0}.*".format(base_dir)):
                     yield file_path
+
     def run(self):
         # Figure out which sub-commands we need to run.
         log.info("start publishing on server [%s]: ", self.server)
         if not os.path.isdir(self.dist_dir):
-            log.info("no distribution to publish cannot find distribution folder '%s'",self.dist_dir)
+            log.info("no distribution to publish cannot find distribution folder '%s'", self.dist_dir)
             return
 
         with FTP(self.server) as ftp:
@@ -131,6 +134,7 @@ class Deploy(Command):
                     log.info("send stor action: 'STOR %s'", os.path.basename(file_path))
                 else:
                     ftp.storbinary("STOR {0}".format(os.path.basename(file_path)), open(file_path, 'rb'))
+
 
 class Clean(_clean):
     def run(self):
@@ -160,24 +164,29 @@ class build_py(_build_py):
                 package = package.split('.')
             elif type(package) not in (list, tuple):
                 raise TypeError(
-                  "'package' must be a string (dot-separated), list, or tuple")
+                    "'package' must be a string (dot-separated), list, or tuple")
             outfile = self.get_module_outfile(self.build_lib, package, module)
             fix_version(outfile, self.dry_run)
-        
+
     def test(self):
         test()
+
 
 class Test(Command):
     description = "Launch test use cases"
     user_options = []
+
     def initialize_options(self):
         pass
+
     def finalize_options(self):
         pass
+
     def run(self):
         test()
 
-def test(test_modules = TEST_MODULES, message = "running tests"):
+
+def test(test_modules=TEST_MODULES, message="running tests"):
     """
     Run test cases contained wihtin the test folder.
     """
@@ -210,7 +219,9 @@ class Verify(Command):
     def run(self):
         #startup the web server
         log.info("integration test run on port %d", self.port)
-        p = Popen("python {0} --port={1}".format(os.path.join("src", "test", "python", "webtest", "webserver.py"), self.port), shell=True)
+        p = Popen(
+            "python {0} --port={1}".format(os.path.join("src", "test", "python", "webtest", "webserver.py"), self.port),
+            shell=True)
         try:
             # p = Process(target=webserver.start, args=(self.port,))
             # process based solution does not work :(
@@ -222,11 +233,11 @@ class Verify(Command):
             log.info("shutdown the web server")
             p.terminate()
 
-class build_scripts(_build_scripts):
 
+class build_scripts(_build_scripts):
     def run(self):
         _build_scripts.run(self)
-        self.fixversion()
+        self.fix_version()
 
     def fix_version(self):
         log.info("fix version on scripts")
@@ -235,27 +246,29 @@ class build_scripts(_build_scripts):
             fix_version(outfile, self.dry_run)
 
 #cmdclass={'build_py': build_py}, used to test.
-setup(cmdclass={'build_py': build_py, 'build_scripts': build_scripts, 'clean': Clean, 'deploy': Deploy, 'verify': Verify, 'test': Test},
-      name='curi',
-      version=VERSION,
-      description='URI manipulation',
-      author='Romain Gilles',
-      author_email='romain dot gilles at gmail dot com',
-      url='http://romain.gilles.free.fr',
-      packages=['web'],
-      package_dir={'':os.path.join('src', 'main', 'python')},
-#      requires=['PyHamcrest'],
-      scripts=[os.path.join('src', 'main', 'scripts', 'curi.py')],
-      classifiers=[
-          'Development Status :: 4 - Beta',
-          'Environment :: Console',
-          'Environment :: Web Environment',
-          'Intended Audience :: Developers',
-          'License :: OSI Approved :: Apache Software License',
-          'Operating System :: MacOS :: MacOS X',
-          'Operating System :: Microsoft :: Windows',
-          'Operating System :: POSIX',
-          'Programming Language :: Python',
-          'Topic :: Software Development :: URI manipulation',
-          ],
-     )
+setup(
+    cmdclass={'build_py': build_py, 'build_scripts': build_scripts, 'clean': Clean, 'deploy': Deploy, 'verify': Verify,
+              'test': Test},
+    name='curi',
+    version=VERSION,
+    description='URI manipulation',
+    author='Romain Gilles',
+    author_email='romain dot gilles at gmail dot com',
+    url='http://romain.gilles.free.fr',
+    packages=['web'],
+    package_dir={'': os.path.join('src', 'main', 'python')},
+    #      requires=['PyHamcrest'],
+    scripts=[os.path.join('src', 'main', 'scripts', 'curi.py')],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX',
+        'Programming Language :: Python',
+        'Topic :: Software Development :: URI manipulation',
+        ],
+    )
