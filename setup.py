@@ -10,11 +10,14 @@ from distutils.command.clean import clean as _clean
 from distutils import log
 import fnmatch
 from ftplib import FTP
+from shutil import rmtree
 from subprocess import  Popen
 import sys
 from time import sleep
 import unittest
 import os
+
+PYTHON_CACHE = "__pycache__"
 sys.path.append(os.path.join(sys.path[0],'src','main','python'))
 sys.path.append(os.path.join(sys.path[0],'src','test','python'))
 from webtest import urilibtest, assertiontest, itest
@@ -120,6 +123,9 @@ class Clean(_clean):
         if os.path.isfile(MANIFEST_FILE_NAME):
             log.info("remove generated manifest file")
             os.remove(MANIFEST_FILE_NAME)
+        if os.path.isdir(PYTHON_CACHE):
+            log.info("remove python cache directory: %s", PYTHON_CACHE)
+            rmtree(PYTHON_CACHE)
 
 
 class build_py(_build_py):
