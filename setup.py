@@ -258,7 +258,7 @@ setup(
     packages=['web'],
     package_dir={'': os.path.join('src', 'main', 'python')},
     #      requires=['PyHamcrest'],
-    scripts=[os.path.join('src', 'main', 'scripts', 'curi.py')],
+    scripts=[os.path.join('src', 'main', 'scripts', 'curi.py'), os.path.join('src', 'main', 'scripts', 'curi')],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',

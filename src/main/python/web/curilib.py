@@ -26,7 +26,7 @@ def validate_method(method):
     return method in HTTP_METHODS
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(description='Process uri to create request.')
     parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(version))
     parser.add_argument('uri', help="the uri where the request will be sent")
@@ -38,7 +38,7 @@ def main():
     #    parser.add_argument('--post', action='store_true', help="Activate the post method")
     #    parser.add_argument('--del', action='store_true', help="Activate the delete method")
     #    parser.add_argument('--head', action='store_true', help="Activate the head method")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     target = uri(args.uri)
     if not validate_method(args.request):
         parser.error("invalid method name: {0}".format(args.request))
