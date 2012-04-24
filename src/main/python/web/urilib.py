@@ -33,26 +33,31 @@ def _is_supported_method(method):
     """
     return method in HTTP_METHODS
 
-def _fail_if_not_supported(http_method):
-        """
-        Throws an UnsupportedMethodError if the given method name is not supported.
-        @see _is_supported_method
-        """
-        if not _is_supported_method(http_method):
-            raise UnsupportedMethodError(http_method)
 
-class UnsupportedMethodError (Exception):
+def _fail_if_not_supported(http_method):
+    """
+    Throws an UnsupportedMethodError if the given method name is not supported.
+    @see _is_supported_method
+    """
+    if not _is_supported_method(http_method):
+        raise UnsupportedMethodError(http_method)
+
+
+class UnsupportedMethodError(Exception):
     """
     This error is raised when the method does not exist
     in the supported http method
     @see web.HTTP_METHODS
     """
+
     def __init__(self, bad_method):
         super().__init__(bad_method)
         self.unsupported_method = bad_method
+
     @property
     def message(self):
         return "unsupported method: {0}".format(self.unsupported_method)
+
 
 def valid_segment(segment):
     """
@@ -65,6 +70,7 @@ def valid_segment(segment):
     @param segment the not null segment string to validate.
     """
     return segment is not None and SEGMENT_SEPARATOR not in segment and QUERY_SEPARATOR not in segment and FRAGMENT_SEPARATOR not in segment
+
 
 def valid_segments(segments):
     """
@@ -87,22 +93,25 @@ def valid_segments(segments):
             return False
     return True
 
+
 def _is_absolute_path(segments):
     return len(segments) > 1 and segments[0] == EMPTY_SEGMENT
 
-def _convert_to_segment(path, trim_root_segment = True):
-    assert_that_argument_type_is(path, (str,tuple),"path")
+
+def _convert_to_segment(path, trim_root_segment=True):
+    assert_that_argument_type_is(path, (str, tuple), "path")
     result = None
     if isinstance(path, str):
         if len(path) < 1 or path == ROOT_PATH:
             result = EMPTY_SEGMENTS
-        else :
+        else:
             result = path.split(SEGMENT_SEPARATOR)
 
     if trim_root_segment and _is_absolute_path(result):
         result = tuple(result[1:len(result)])
 
     return result
+
 
 class URI(object):
     """
@@ -116,6 +125,7 @@ class URI(object):
         """
         self.__uri = uri
         self.__structure = urlsplit(uri)
+
     def __str__(self):
         return self.__uri
 
@@ -126,6 +136,7 @@ class URI(object):
         If not present returns an empty string.
         """
         return self.__structure.scheme
+
     @property
     def authority(self):
         """
@@ -141,6 +152,7 @@ class URI(object):
         is considered to be registry-based.
         """
         return self.__structure.netloc
+
     @property
     def path(self):
         """
@@ -150,6 +162,7 @@ class URI(object):
         path is absolute, followed by the slash-separated path segments.
         """
         return self.__structure.path
+
     @property
     def query(self):
         """
@@ -157,6 +170,7 @@ class URI(object):
         an empty string otherwise.
         """
         return self.__structure.query
+
     @property
     def fragment(self):
         """
@@ -164,15 +178,19 @@ class URI(object):
         otherwise.
         """
         return self.__structure.fragment
+
     @property
     def username(self):
         return self.__structure.username
+
     @property
     def password(self):
         return self.__structure.password
+
     @property
     def hostname(self):
         return self.__structure.hostname
+
     @property
     def port(self):
         return self.__structure.port
@@ -198,7 +216,9 @@ class URI(object):
                                   to valid_segment method.
         """
         if not valid_segment(segment):
-            raise AssertionError("{0} is an invalid segment it must be not null string and not contain any of the following characters: '/' '?' '#'".format(str(segment)))
+            raise AssertionError(
+                "{0} is an invalid segment it must be not null string and not contain any of the following characters: '/' '?' '#'".format(
+                    str(segment)))
         return self.append_segments((segment,))
 
     def append_segments(self, segments):
@@ -242,7 +262,7 @@ class URI(object):
         """
         if nb < 1:
             return self
-        #split path
+            #split path
         segments = self.segments
         #return self if there is no segments to trim
         if segments is EMPTY_SEGMENTS:
@@ -284,7 +304,8 @@ class URI(object):
         if not valid_segments(segments):
             raise AssertionError("invalid segments: {0}".format(str(segments)))
 
-        path = SEGMENT_SEPARATOR.join(segments) if _is_absolute_path(segments) else SEGMENT_SEPARATOR.join(("", ) + segments)
+        path = SEGMENT_SEPARATOR.join(segments) if _is_absolute_path(segments) else SEGMENT_SEPARATOR.join(
+            ("", ) + segments)
 
         return _create_uri_from_elements(self.scheme, self.authority, path, self.query, self.fragment)
 
@@ -315,7 +336,7 @@ class URI(object):
         """
         return FRAGMENT_SEPARATOR not in str(query)
 
-    def append_query(self, query, separator = "&"):
+    def append_query(self, query, separator="&"):
         """
         Returns the URI formed from this URI and the given query.
 
@@ -328,8 +349,9 @@ class URI(object):
         @return the URI formed from this URI and the given query.
         """
         if query is not None and not isinstance(query, (str, tuple)):
-            raise AssertionError("{0} must be a string or a tuple of tuple like ((param1, value1),(param2, value2))".format(str(query)))
-        # create the string representation of the query
+            raise AssertionError(
+                "{0} must be a string or a tuple of tuple like ((param1, value1),(param2, value2))".format(str(query)))
+            # create the string representation of the query
         str_query = ""
         if isinstance(query, str):
             str_query = query
@@ -359,7 +381,7 @@ class URI(object):
         formed by removing it; this URI unchanged, otherwise.
         """
         return self.trim_fragment()
-        
+
 
     def append_fragment(self, fragment):
         """
@@ -376,6 +398,7 @@ class URI(object):
             return _create_uri_from_elements(self.scheme, self.authority, self.path, self.query, None)
         else:
             return self
+
     @property
     def absolute(self):
         """
@@ -392,10 +415,12 @@ class URI(object):
         If this URI is absolute returns the absolute path
         concatened with the query and the fragment if any.
         """
-        return URI(self.absolute)
+        return _uri(self.absolute)
+
 
 def _create_uri_from_elements(scheme, authority, path, query, fragment):
-    return URI(SplitResult(scheme, authority, path, query, fragment).geturl())
+    return _uri(SplitResult(scheme, authority, path, query, fragment).geturl())
+
 
 class Message(object):
     def __init__(self, headers, body):
@@ -410,10 +435,11 @@ class Response(Message):
         self.status_code = status_code
         self.reason_phrase = reason_phrase
         self.http_version = http_version
+
     @property
     def charset(self):
         content_type = self.headers[HTTP_CONTENT_TYPE_HEADER]
-        if content_type is not None and content_type.find(CHARSET_TOKEN) > 0 :
+        if content_type is not None and content_type.find(CHARSET_TOKEN) > 0:
             return content_type[content_type.find(CHARSET_TOKEN) + len(CHARSET_TOKEN):]
         return "UTF-8"
 
@@ -422,6 +448,7 @@ class Response(Message):
         status_line = "HTTP-{0} {1} {2}".format(self.http_version, self.status_code, self.reason_phrase)
         return "{0}\n{1}{2}".format(status_line, self.headers, str(self.body, self.charset, 'replace'))
 
+
 class Request(Message):
     def __init__(self, headers, body, method, request_uri, http_version):
         super().__init__(headers, body)
@@ -429,15 +456,16 @@ class Request(Message):
         self.request_uri = request_uri
         self.http_version = http_version
 
+
 class AbstractRequestHandler(object):
-    def request(self, uri, method = GET, headers = None, body = None):
+    def request(self, uri, method=GET, headers=None, body=None):
         pass
 
-class HttpRequestHandler(AbstractRequestHandler):
 
+class HttpRequestHandler(AbstractRequestHandler):
     connections = {}
 
-    def request(self, uri, method = GET, headers = None, body = None):
+    def request(self, uri, method=GET, headers=None, body=None):
         headers = headers if headers is not None else {}
         authority = uri.authority
         connection = self.connections.get(authority)
@@ -448,3 +476,16 @@ class HttpRequestHandler(AbstractRequestHandler):
         response = connection.getresponse()
         result = Response(response.headers, response.read(), response.status, response.reason, response.version)
         return result
+
+DEFAULT_REQUEST_HANDLER = HttpRequestHandler()
+REQUEST_HANDLER = DEFAULT_REQUEST_HANDLER
+
+def _request(uri, method, headers, body):
+    return REQUEST_HANDLER.request(uri, method, headers, body)
+
+
+def _uri(uri):
+    """
+    Factory method to create URI instance
+    """
+    return URI(uri)

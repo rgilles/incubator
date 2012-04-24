@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-VERSION="${version}"
+VERSION = "${version}"
 DEFAULT_HTTP_HANDLER = None
 
 HTTP_GET = 'GET'
@@ -38,13 +38,13 @@ FRAGMENT_SEPARATOR = "#"
 USER_INFO_SEPARATOR = "@"
 PORT_SEPARATOR = ":"
 
-from web.urilib import HttpRequestHandler
-DEFAULT_REQUEST_HANDLER = HttpRequestHandler()
-REQUEST_HANDLER = DEFAULT_REQUEST_HANDLER
-
 def uri(uri):
-    from web.urilib import URI
-    return URI(uri)
+    from web.urilib import _uri
 
-def request(uri, method=HTTP_GET, body = None, headers = None):
-    return REQUEST_HANDLER.request(uri, method, headers, body)
+    return _uri(uri)
+
+
+def request(uri, method=HTTP_GET, body=None, headers=None):
+    from web.urilib import _request
+
+    return _request(uri, method, headers, body)
