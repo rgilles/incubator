@@ -42,7 +42,7 @@ MANIFEST_FILE_NAME = "MANIFEST"
 
 VERSION_TAG = '${version}'
 
-VERSION = '1.0-SNAPSHOT'
+VERSION = '1.0-M2'
 
 TEST_MODULES = [urilibtest,
                 assertiontest, ]
