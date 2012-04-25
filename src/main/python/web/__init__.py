@@ -26,7 +26,7 @@ HTTP_OPTIONS = 'OPTIONS'
 HTTP_TRACE = 'TRACE'
 HTTP_CONNECT = 'CONNECT'
 
-HTTP_METHODS = HTTP_GET, HTTP_PUT, HTTP_DELETE, HTTP_POST, HTTP_HEAD, HTTP_OPTIONS, HTTP_TRACE
+HTTP_METHODS = HTTP_GET, HTTP_PUT, HTTP_DELETE, HTTP_POST, HTTP_HEAD, HTTP_OPTIONS, HTTP_TRACE, HTTP_CONNECT
 
 # Separators for parsing a URI string.
 SCHEME_SEPARATOR = ":"
@@ -48,3 +48,10 @@ def request(uri, method=HTTP_GET, body=None, headers=None):
     from web.urilib import _request
 
     return _request(uri, method, headers, body)
+
+
+def set_request_handler(request_handler):
+    from web.urilib import _set_request_handler
+
+    _set_request_handler(request_handler)
+

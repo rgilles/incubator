@@ -480,6 +480,12 @@ class HttpRequestHandler(AbstractRequestHandler):
 DEFAULT_REQUEST_HANDLER = HttpRequestHandler()
 REQUEST_HANDLER = DEFAULT_REQUEST_HANDLER
 
+def _set_request_handler(request_handler):
+    assert_that_argument_type_is(request_handler, AbstractRequestHandler, "request_handler")
+    global REQUEST_HANDLER
+    REQUEST_HANDLER = request_handler
+
+
 def _request(uri, method, headers, body):
     return REQUEST_HANDLER.request(uri, method, headers, body)
 

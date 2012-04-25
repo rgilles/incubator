@@ -35,7 +35,7 @@ import os
 PYTHON_CACHE = "__pycache__"
 sys.path.append(os.path.join(sys.path[0], 'src', 'main', 'python'))
 sys.path.append(os.path.join(sys.path[0], 'src', 'test', 'python'))
-from webtest import urilibtest, assertiontest, itest
+from webtest import urilibtest, assertiontest, itest, curilibtest
 from webtest.webserver import DEFAULT_PORT_NUMBER
 
 MANIFEST_FILE_NAME = "MANIFEST"
@@ -45,7 +45,9 @@ VERSION_TAG = '${version}'
 VERSION = '1.0-SNAPSHOT'
 
 TEST_MODULES = [urilibtest,
-                assertiontest, ]
+                assertiontest,
+                curilibtest,
+                ]
 ITEST_MODULES = [itest]
 
 class DistutilsTestError(DistutilsError):
